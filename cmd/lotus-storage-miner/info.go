@@ -33,6 +33,12 @@ var infoCmd = &cli.Command{
 	Subcommands: []*cli.Command{
 		infoAllCmd,
 	},
+	Flags: []cli.Flag{
+		&cli.BoolFlag{
+			Name:  "show-sectors-info",
+			Usage: "show sectors info",
+		},
+	},
 	Action: infoCmdAct,
 }
 
@@ -199,10 +205,12 @@ func infoCmdAct(cctx *cli.Context) error {
 
 	fmt.Printf("Expected Seal Duration: %s\n\n", sealdur)
 
-	fmt.Println("Sectors:")
-	err = sectorsInfo(ctx, nodeApi)
-	if err != nil {
-		return err
+	if cctx.Bool("show-sectors") {
+		fmt.Println("Sectors:")
+		err = sectorsInfo(ctx, nodeApi)
+		if err != nil {
+			return err
+		}
 	}
 
 	// TODO: grab actr state / info
