@@ -21,7 +21,6 @@ import (
 
 	"github.com/filecoin-project/go-state-types/abi"
 
-	"github.com/filecoin-project/lotus/build"
 	"github.com/filecoin-project/lotus/chain/beacon"
 	"github.com/filecoin-project/lotus/chain/types"
 	"github.com/filecoin-project/lotus/node/modules/dtypes"
@@ -76,7 +75,7 @@ func NewDrandBeacon(genesisTs, interval uint64, ps *pubsub.PubSub, config dtypes
 	}
 
 	dlogger := dlog.NewKitLoggerFrom(kzap.NewZapSugarLogger(
-		log.SugaredLogger.Desugar(), zapcore.InfoLevel))
+		log.SugaredLogger.Desugar(), zapcore.WarnLevel))
 
 	var clients []dclient.Client
 	for _, url := range config.Servers {
@@ -132,8 +131,6 @@ func (db *DrandBeacon) Entry(ctx context.Context, round uint64) <-chan beacon.Re
 	}
 
 	go func() {
-		start := build.Clock.Now()
-		log.Infow("start fetching randomness", "round", round)
 		resp, err := db.client.Get(ctx, round)
 
 		var br beacon.Response
@@ -143,7 +140,6 @@ func (db *DrandBeacon) Entry(ctx context.Context, round uint64) <-chan beacon.Re
 			br.Entry.Round = resp.Round()
 			br.Entry.Data = resp.Signature()
 		}
-		log.Infow("done fetching randomness", "round", round, "took", build.Clock.Since(start))
 		out <- br
 		close(out)
 	}()
